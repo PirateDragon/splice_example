@@ -34,14 +34,10 @@ int main(int argc, char** argv) {
     int fdin = open(infile, O_RDONLY);
     int fdout = open(outfile, O_CREAT|O_WRONLY, 0644);
     size_t len = 0;
+    const size_t batch = 0x1000 * 16;
     while (size > 0) {
-        len = 0x1000 * 16;
-        if (len <size ) {
-            size -= len;
-        }else{
-            len = size;
-            size = 0;
-        }
+        len = batch < size? batch:size;
+        size -= len;
         splice(fdin, NULL, fds[1], NULL, len, SPLICE_F_MORE | SPLICE_F_MOVE|SPLICE_F_NONBLOCK);
         splice(fds[0], NULL, fdout, NULL, len, SPLICE_F_MORE | SPLICE_F_MOVE|SPLICE_F_NONBLOCK);
     }
